@@ -12,6 +12,6 @@ done
 # Update script once every reboot
 wget -qO "${modpath}system/bin/bourbon" "https://raw.githubusercontent.com/pedrozzz0/bourbon/master/bourbon"
 
-sleep 120
+sleep 150
 
 bourbon &
