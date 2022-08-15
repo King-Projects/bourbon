@@ -1,0 +1,7 @@
+id=bourbon
+name=Bourbon
+version=1.0.0
+versionCode=99
+author=pedro (pedrozzz0 @ GitHub), Matt Yang (yc9559 @ GitHub)
+description=A task optimizer which improves user-experience by aligning tasks correctly based on their priority. 
+build_date=Sun Aug 14 12:27:41 -03 2022
