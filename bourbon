@@ -8,7 +8,7 @@
 #####################
 bbn_log="/data/media/0/ktsr/bourbon.log"
 bbn_info="/data/media/0/ktsr/bourbon.info"
-ver="1.0.2"
+ver="1.0.3"
 
 [[ -d "/data/adb/modules/KTSR/" ]] && {
 write_info "[!] KTSR found, exiting..."
@@ -219,15 +219,17 @@ bbn_opt() {
 	change_task_nice "kgsl_worker" "-20"
 	pin_proc_on_perf "kgsl_worker"
 	change_task_nice "mali_jd_thread" "-20"
-	change_task_rt_ff "mali_jd_thread" "60"
+	change_task_rt "mali_jd_thread" "50"
 	change_task_nice "mali_event_thread" "-20"
 	# Pin HWC on perf cluster to reduce jitter
 	pin_proc_on_perf "composer"
 	# Let SF use all cores
 	pin_proc_on_all "surfaceflinger"
-	# Let devfreq boost run with max priority and set it to perf cluster as it is a critical task (boosting DDR)
+	# Devfreq boost should run with max priority and into the perf cluster as it is a critical task (boosting DDR)
+	# Don't run it with RT_MAX_PRIO - 1 though
 	change_task_nice "devfreq_boost" "-20"
 	pin_proc_on_perf "devfreq_boost"
+	change_task_rt "devfreq_boost" "50"
 	# Pin these kthreads to the perf cluster as they also play a major role in rendering frames to the display
 	# Pin only the first threads as others are non-critical
 	n=80
@@ -245,8 +247,8 @@ bbn_opt() {
 	# Pin TS workqueues to perf cluster to reduce latency
 	pin_proc_on_perf "fts_wq"
 	pin_proc_on_perf "nvt_ts_workqueu"
-	change_task_rt_ff "nvt_ts_workqueu" "50"
-	change_task_rt_ff "fts_wq" "50"
+	change_task_rt "nvt_ts_workqueu" "50"
+	change_task_rt "fts_wq" "50"
 	# Pin Samsung HyperHAL to perf cluster
 	pin_proc_on_perf "hyper@"
 	# Queue UFS/EMMC clock gating with max priority
@@ -254,8 +256,8 @@ bbn_opt() {
 	change_task_nice "mmc_clk_gate" "-20"
 	# Queue CVP fence request handler with max priority
 	change_task_nice "thread_fence" "-20"
-	# Queue cpu_boost worker with max priority for obvious reasons
-	change_task_rt_ff "cpu_boost_work" "2"
+	# Queue CPU boost worker with max priority for obvious reasons
+	change_task_rt "cpu_boost_work" "2"
 	change_task_nice "cpu_boost_work" "-20"
 	# Queue touchscreen related workers with max priority
 	change_task_nice "speedup_resume_wq" "-20"
@@ -265,23 +267,23 @@ bbn_opt() {
 	change_task_nice "tp_async" "-20"
 	change_task_nice "wakeup_clk_wq" "-20"
 	# Set RT priority correctly for critical tasks
-	change_task_rt_ff "kgsl_worker_thread" "16"
-	change_task_rt_ff "crtc_commit" "16"
-	change_task_rt_ff "crtc_event" "16"
-	change_task_rt_ff "pp_event" "16"
-	change_task_rt_ff "rot_commitq" "5"
-	change_task_rt_ff "rot_doneq" "5"
-	change_task_rt_ff "rot_fenceq" "5"
-	change_task_rt_ff "system_server" "2"
-	change_task_rt_ff "surfaceflinger" "2"
-	change_task_rt_ff "composer" "2"
+	change_task_rt "kgsl_worker_thread" "6"
+	change_task_rt "crtc_commit" "16"
+	change_task_rt "crtc_event" "16"
+	change_task_rt "pp_event" "16"
+	change_task_rt "rot_commitq_" "5"
+	change_task_rt "rot_doneq_" "5"
+	change_task_rt "rot_fenceq_" "5"
+	change_task_rt "system_server" "2"
+	change_task_rt "surfaceflinger" "2"
+	change_task_rt "composer" "2"
 	# Boost app boot process
 	change_task_nice "zygote" "-20"
 	# Queue VM writeback with max priority
 	change_task_nice "writeback" "-20"
 	# Affects IO latency/throughput
 	change_task_nice "kblockd" "-20"
-	# Those workqueues don't need max priority
+	# Those workqueues don't need any priority
 	change_task_nice "ipawq" "0"
 	change_task_nice "iparepwq" "0"
 	change_task_nice "wlan_logging_th" "10"
