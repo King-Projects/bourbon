@@ -244,6 +244,8 @@ bbn_opt() {
 	pin_proc_on_perf "mdss_disp_wake"
 	pin_proc_on_perf "vsync_retire_work"
 	pin_proc_on_perf "pq@"
+	# Improve I/O performance by pinning the block daemon into the perf cluster
+	pin_proc_on_perf "kblockd"
 	# Pin TS workqueues to perf cluster to reduce latency
 	pin_proc_on_perf "fts_wq"
 	pin_proc_on_perf "nvt_ts_workqueu"
