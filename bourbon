@@ -1,6 +1,6 @@
 #!/system/bin/sh
 # Bourbon™ by Pedro (pedrozzz0 @ GitHub)
-# Credits: Ktweak, by Draco (tytydraco @ GitHub), Uperf, by Matt Yang (yc9559 @ CoolApk)
+# Thanks to Draco (tytydraco @ GitHub) and Matt Yang (yc9559 @ CoolApk)
 # If you wanna use the code as part of your project, please maintain the credits to it's respectives authors
 
 #####################
@@ -8,16 +8,19 @@
 #####################
 bbn_log="/data/media/0/ktsr/bourbon.log"
 bbn_info="/data/media/0/ktsr/bourbon.info"
-ver="1.0.3"
-
+ver="1.1.0"
+intent_act="android.intent.action.MAIN"
+intent_cat="android.intent.category.HOME"
+launcher_pkg="$(pm resolve-activity -a "$intent_act" -c "$intent_cat" | grep packageName | head -1 | cut -d= -f2)"
+	
 [[ -d "/data/adb/modules/KTSR/" ]] && {
-write_info "[!] KTSR found, exiting..."
-exit 1
+	write_info "[!] KTSR found, exiting..."
+	exit 1
 }
 
-notif_start() { su -lp 2000 -c "cmd notification post -S bigtext -t 'Bourbon is executing' tag 'Affining tasks correctly...'" >/dev/null 2>&1; }
+notif_start() { su -lp 2000 -c "cmd notification post -S bigtext -t 'Bourbon is executing' tag 'Optimizing system tasks...'" >/dev/null 2>&1; }
 
-notif_end() { su -lp 2000 -c "cmd notification post -S bigtext -t 'Bourbon is executing' tag 'Optimizing done!'" >/dev/null 2>&1; }
+notif_end() { su -lp 2000 -c "cmd notification post -S bigtext -t 'Bourbon is executing' tag 'Optimizatiob done!'" >/dev/null 2>&1; }
 
 write_info() { echo "$1" >"$bbn_info"; }
 
@@ -210,11 +213,15 @@ rebuild_ps_cache() { ps_ret="$(ps -Ao pid,args)"; }
 bbn_opt() {
 	# Input dispatcher/reader
 	change_thread_nice "system_server" "Input" "-20"
+	# Render threads should have all cores
+	change_thread_affinity "$launcher_pkg" "RenderThread|GLThread" "ff"
+	change_thread_affinity "$launcher_pkg" "GPU completion|HWC release|hwui|FramePolicy|ScrollPolicy|ged-swd" "0f"
+	pin_thread_on_pwr "$launcher_pkg" "Jit thread pool|HeapTaskDaemon|FinalizerDaemon|ReferenceQueueD"
 	# Speed up searching service manager
 	change_task_nice "servicemanag" "-20"
 	# Not important
-	pin_thread_on_pwr "system_server" "VoiceReporter|StatsCompanionS|backup|Sync|Observer|TaskSnapshot|backup-|CachedAppOptimi|PeriodicCleaner"
-	pin_thread_on_pwr "ndroid.systemui" "mi_analytics_up"
+	pin_thread_on_pwr "system_server" "VoiceReporter|TaskSnapshot|Greezer|CachedApp|SystemPressure|SensorService|[Mm]emory"
+	pin_thread_on_pwr "ndroid.systemui" "mi_analytics_up|Jit thread pool|HeapTaskDaemon|FinalizerDaemon|ReferenceQueueD"
 	# Run KGSL/Mali workers with max priority as both are critical tasks
 	change_task_nice "kgsl_worker" "-20"
 	pin_proc_on_perf "kgsl_worker"
@@ -285,6 +292,8 @@ bbn_opt() {
 	change_task_nice "writeback" "-20"
 	# Affects IO latency/throughput
 	change_task_nice "kblockd" "-20"
+	# System thread
+	change_task_nice "system" "-20"
 	# Those workqueues don't need any priority
 	change_task_nice "ipawq" "0"
 	change_task_nice "iparepwq" "0"
