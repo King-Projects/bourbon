@@ -8,7 +8,7 @@
 #####################
 bbn_log="/data/media/0/ktsr/bourbon.log"
 bbn_info="/data/media/0/ktsr/bourbon.info"
-ver="1.1.0"
+ver="1.1.1"
 intent_act="android.intent.action.MAIN"
 intent_cat="android.intent.category.HOME"
 launcher_pkg="$(pm resolve-activity -a "$intent_act" -c "$intent_cat" | grep packageName | head -1 | cut -d= -f2)"
@@ -20,7 +20,7 @@ launcher_pkg="$(pm resolve-activity -a "$intent_act" -c "$intent_cat" | grep pac
 
 notif_start() { su -lp 2000 -c "cmd notification post -S bigtext -t 'Bourbon is executing' tag 'Optimizing system tasks...'" >/dev/null 2>&1; }
 
-notif_end() { su -lp 2000 -c "cmd notification post -S bigtext -t 'Bourbon is executing' tag 'Optimizatiob done!'" >/dev/null 2>&1; }
+notif_end() { su -lp 2000 -c "cmd notification post -S bigtext -t 'Bourbon is executing' tag 'Optimization done!'" >/dev/null 2>&1; }
 
 write_info() { echo "$1" >"$bbn_info"; }
 
