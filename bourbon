@@ -260,6 +260,8 @@ bbn_opt() {
 	change_task_rt "fts_wq" "50"
 	# Pin Samsung HyperHAL to perf cluster
 	pin_proc_on_perf "hyper@"
+	# Cryptography ain't cheap, pin it into perf cluster
+	pin_proc_on_perf "cryptd"
 	# Queue UFS/EMMC clock gating with max priority
 	change_task_nice "ufs_clk_gating" "-20"
 	change_task_nice "mmc_clk_gate" "-20"
@@ -298,6 +300,8 @@ bbn_opt() {
 	change_task_nice "ipawq" "0"
 	change_task_nice "iparepwq" "0"
 	change_task_nice "wlan_logging_th" "10"
+	# Give crypto daemon as much CPU time as possible.
+	change_task_nice "cryptd" "-20"
 }
 
 notif_start
