@@ -19,7 +19,6 @@ launcher_pkg="$(pm resolve-activity -a "$intent_act" -c "$intent_cat" | grep pac
 }
 
 notif_start() { su -lp 2000 -c "cmd notification post -S bigtext -t 'Bourbon is executing' tag 'Optimizing system tasks...'" >/dev/null 2>&1; }
-
 notif_end() { su -lp 2000 -c "cmd notification post -S bigtext -t 'Bourbon is executing' tag 'Optimization done!'" >/dev/null 2>&1; }
 
 write_info() { echo "$1" >"$bbn_info"; }
@@ -222,6 +221,8 @@ bbn_opt() {
 	# Not important
 	pin_thread_on_pwr "system_server" "VoiceReporter|TaskSnapshot|Greezer|CachedApp|SystemPressure|SensorService|[Mm]emory"
 	pin_thread_on_pwr "ndroid.systemui" "mi_analytics_up|Jit thread pool|HeapTaskDaemon|FinalizerDaemon|ReferenceQueueD"
+	# khugepaged takes care of memory management, but it's not that performance-critical, so pin it in the little cluster.
+	pin_thread_on_pwr "khugepaged"
 	# Run KGSL/Mali workers with max priority as both are critical tasks
 	change_task_nice "kgsl_worker" "-20"
 	pin_proc_on_perf "kgsl_worker"
@@ -302,6 +303,8 @@ bbn_opt() {
 	change_task_nice "wlan_logging_th" "10"
 	# Give crypto daemon as much CPU time as possible.
 	change_task_nice "cryptd" "-20"
+	# Give khugepaged as much CPU time as possible.
+	change_task_nice "khugepaged" "-20"
 }
 
 notif_start
